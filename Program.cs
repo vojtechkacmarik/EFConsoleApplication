@@ -1,107 +1,98 @@
 ﻿using System;
-using System.Data.Entity;
-using System.Data.Entity.Infrastructure.DependencyResolution;
-using System.Data.Entity.Infrastructure.Interception;
+using System.Collections.Generic;
 using System.Linq;
-using Castle.MicroKernel.Registration;
-using Castle.MicroKernel.Resolvers;
-using Castle.MicroKernel.Resolvers.SpecializedResolvers;
-using Castle.Windsor;
-using Castle.Windsor.Installer;
-using EFConsoleApplication.Components;
+using EFConsoleApplication.Enums;
 using EFConsoleApplication.Models;
 
 namespace EFConsoleApplication
 {
     public class Program
     {
-        private static readonly object s_Lock = new object();
-        private static IWindsorContainer s_Container;
-        private static bool s_Disposed;
-
-        /// <summary>
-        /// Bootstraps this instance.
-        /// </summary>
-        /// <returns>Instance of Windsor Container.</returns>
-        public static IWindsorContainer Bootstrap()
-        {
-            lock (s_Lock)
-            {
-                if (s_Container != null) return s_Container;
-
-                s_Container = new WindsorContainer();
-
-                s_Container.Kernel.Resolver.AddSubResolver(new CollectionResolver(s_Container.Kernel, true));
-                s_Container.Register(Component.For<ILazyComponentLoader>().ImplementedBy<LazyOfTComponentLoader>());
-                s_Container.Register(Component.For<IWindsorContainer>().Instance(s_Container));
-                s_Container.Install(FromAssembly.This());
-
-                return s_Container;
-            }
-        }
-
-        /// <summary>
-        /// Releases unmanaged and - optionally - managed resources.
-        /// </summary>
-        public static void Dispose()
-        {
-            lock (s_Lock)
-            {
-                if (s_Container != null && !s_Disposed)
-                {
-                    s_Container.Dispose();
-                }
-
-                s_Disposed = true;
-            }
-        }
-
-        public static void Init()
-        {
-            DbConfiguration.Loaded += (s, a) =>
-            {
-                a.AddDependencyResolver(new WindsorDependencyResolver(s_Container), false);
-            };
-
-            var interceptors = s_Container.ResolveAll<IDbCommandTreeInterceptor>();
-            foreach (var interceptor in interceptors)
-            {
-                DbInterception.Add(interceptor);
-            }
-
-            using (var context = new PersonDbContext())
-            {
-                context.Database.Initialize(force: true);
-            }
-        }
-
         public static void Main(string[] args)
         {
-            Bootstrap();
-            Init();
+            PersonInitializer.Bootstrap();
 
-            PerformDatabaseOperations();
-            Console.Write("Person saved!");
+            try
+            {
+                PerformDatabaseOperations();
+            }
+            catch (Exception exception)
+            {
+                Console.WriteLine(exception);
+                throw;
+            }
+
+            Console.Write("Done!");
             Console.ReadLine();
 
-            Dispose();
+            PersonInitializer.Dispose();
         }
 
         private static void PerformDatabaseOperations()
+        {
+            // CreatePersonWithAddress();
+
+            var personsWithoutAddress = GetPersonWithoutAddress(p => p.LastName == "Horak");
+            DeletePersonAddress(p => p.Id == 9, a => a.Id == 2);
+        }
+
+        private static void DeletePersonAddress(Func<Person, bool> singlePersonPredicate, Func<Address, bool> singleAddressPredicate)
+        {
+            using (var dbContext = new PersonDbContext())
+            {
+                var person = dbContext.Persons
+                    .Include(nameof(Person.Addresses))
+                    .Single(singlePersonPredicate);
+
+                var addressToDelete = person.Addresses.Single(singleAddressPredicate);
+                person.Addresses.Remove(addressToDelete);
+                dbContext.SaveChanges();
+            }
+        }
+
+        private static void CreatePersonWithAddress()
         {
             using (var dbContext = new PersonDbContext())
             {
                 var person = new Person
                 {
                     FirstName = "Josef",
-                    LastName = "Novak",
-                    BirthDate = DateTime.Now.AddYears(-45)
+                    LastName = "Horak",
+                    BirthDate = DateTime.Now.AddYears(-35)
                 };
+
+                var address1 = new Address
+                {
+                    City = "Olomouc",
+                    Number = "10",
+                    PostalCode = "12345",
+                    Country = "Czech",
+                    AddressType = AddressType.Home
+                };
+
+                person.Addresses = new List<Address> { address1 };
 
                 dbContext.Persons.Add(person);
                 dbContext.SaveChanges();
+            }
+        }
 
-                var persons = dbContext.Persons.Where(p => p.FirstName == "Josef").ToList();
+        private static IEnumerable<Person> GetPersonWithoutAddress(Func<Person, bool> predicate)
+        {
+            using (var dbContext = new PersonDbContext())
+            {
+                return dbContext.Persons.Where(predicate).ToList();
+            }
+        }
+
+        private static IEnumerable<Person> GetPersonWithAddress(Func<Person, bool> predicate)
+        {
+            using (var dbContext = new PersonDbContext())
+            {
+                return dbContext.Persons
+                    .Include(nameof(Person.Addresses))
+                    .Where(predicate)
+                    .ToList();
             }
         }
     }

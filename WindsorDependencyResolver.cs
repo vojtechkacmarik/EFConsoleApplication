@@ -8,21 +8,21 @@ namespace EFConsoleApplication
 {
     public class WindsorDependencyResolver : IDbDependencyResolver
     {
-        private readonly IWindsorContainer container;
+        private readonly IWindsorContainer m_Container;
 
         public WindsorDependencyResolver(IWindsorContainer container)
         {
-            this.container = container;
+            m_Container = container;
         }
 
         public object GetService(Type type, object key)
         {
-            return container.Kernel.HasComponent(type) ? container.Resolve(type) : null;
+            return m_Container.Kernel.HasComponent(type) ? m_Container.Resolve(type) : null;
         }
 
         public IEnumerable<object> GetServices(Type type, object key)
         {
-            return container.Kernel.HasComponent(type) ? container.ResolveAll(type).Cast<object>() : new object[] { };
+            return m_Container.Kernel.HasComponent(type) ? m_Container.ResolveAll(type).Cast<object>() : new object[] { };
         }
     }
 }

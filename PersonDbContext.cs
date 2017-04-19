@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Data.Entity;
 using System.Data.Entity.ModelConfiguration.Conventions;
+using System.Linq;
 using EFConsoleApplication.Models;
 
 namespace EFConsoleApplication
@@ -8,24 +9,41 @@ namespace EFConsoleApplication
     [DbConfigurationType("EFConsoleApplication.PersonDbConfiguration, EFConsoleApplication")]
     public class PersonDbContext : DbContext
     {
-        public PersonDbContext() : base("name=PersonDbDatabase")
+        private SoftDeleteHelper m_SoftDeleteHelper = new SoftDeleteHelper();
+
+        public PersonDbContext()
+            : base("name=PersonDbDatabase")
         {
-            Init();
+            Configuration.LazyLoadingEnabled = false;
+            Configuration.AutoDetectChangesEnabled = true; // default
+            Configuration.ValidateOnSaveEnabled = true; // default
+
+            Database.Log = Console.Write;
         }
 
-        public DbSet<Person> Persons { get; set; }
         public DbSet<Address> Addresses { get; set; }
-
-        protected override void OnModelCreating(DbModelBuilder modelBuilder)
-        {
-            base.OnModelCreating(modelBuilder);
-
-            modelBuilder.Conventions.Remove<PluralizingTableNameConvention>();
-        }
+        public DbSet<Person> Persons { get; set; }
 
         public override int SaveChanges()
         {
+            // HandleEntityWithHistoryBase();
+            // HandleDeletedEntity();
+
+            return base.SaveChanges();
+        }
+
+        private void HandleDeletedEntity()
+        {
+            foreach (var entry in ChangeTracker.Entries().Where(p => p.State == EntityState.Deleted))
+            {
+                m_SoftDeleteHelper.SoftDelete(this, entry);
+            }
+        }
+
+        private void HandleEntityWithHistoryBase()
+        {
             var changedEntities = ChangeTracker.Entries();
+            if (changedEntities == null) return;
 
             foreach (var changedEntity in changedEntities)
             {
@@ -58,17 +76,25 @@ namespace EFConsoleApplication
                         throw new ArgumentOutOfRangeException();
                 }
             }
-
-            return base.SaveChanges();
         }
 
-        private void Init()
+        protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
-            Configuration.LazyLoadingEnabled = false;
-            // Configuration.AutoDetectChangesEnabled = true;
-            // Configuration.ValidateOnSaveEnabled = true;
+            base.OnModelCreating(modelBuilder);
 
-            Database.Log = Console.Write;
+            modelBuilder.Conventions.Remove<PluralizingTableNameConvention>();
+
+            // ConfigureIsDeleted(modelBuilder);
+        }
+
+        private static void ConfigureIsDeleted(DbModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Person>()
+                            .Map(m => m.Requires(Constants.IS_DELETED_COLUMN_NAME).HasValue(false))
+                            .Ignore(m => m.IsDeleted);
+            modelBuilder.Entity<Address>()
+                .Map(m => m.Requires(Constants.IS_DELETED_COLUMN_NAME).HasValue(false))
+                .Ignore(m => m.IsDeleted);
         }
     }
 }
