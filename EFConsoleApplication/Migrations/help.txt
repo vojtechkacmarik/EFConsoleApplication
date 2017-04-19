@@ -1,0 +1,12 @@
+﻿-- Run these commands in Package Manager Console
+
+-- To add new migration snapshot:
+Add-Migration -Force -ProjectName EFConsoleApplication -StartUpProjectName EFConsoleApplication <SnapShotName>
+
+-- To migrate database to target snapshot use command below.
+-- Migration to the latest database is done automatically when application starts.
+Update-Database -ProjectName EFConsoleApplication -StartUpProjectName EFConsoleApplication –TargetMigration: <SnapShotName>
+
+-- To enable migration for project run command below. This is only initial command which has already been processed at the beginning.
+Enable-Migrations -ProjectName EFConsoleApplication -StartUpProjectName EFConsoleApplication
+
