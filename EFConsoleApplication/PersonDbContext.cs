@@ -85,6 +85,17 @@ namespace EFConsoleApplication
             modelBuilder.Conventions.Remove<PluralizingTableNameConvention>();
 
             // ConfigureIsDeleted(modelBuilder);
+
+            modelBuilder.Entity<Address>()
+                .HasRequired(a => a.Person)
+                .WithMany(x => x.Addresses)
+                .HasForeignKey(a => a.PersonId)
+                .WillCascadeOnDelete(false);
+
+            var convention = new AttributeToTableAnnotationConvention<SoftDeleteAttribute, string>(
+                "SoftDeleteColumnName",
+                (type, attributes) => attributes.Single().ColumnName);
+            modelBuilder.Conventions.Add(convention);
         }
 
         private static void ConfigureIsDeleted(DbModelBuilder modelBuilder)

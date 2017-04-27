@@ -30,10 +30,10 @@ namespace EFConsoleApplication
 
         private static void PerformDatabaseOperations()
         {
-            // CreatePersonWithAddress();
+            //CreatePersonWithAddress();
 
             var personsWithoutAddress = GetPersonWithoutAddress(p => p.LastName == "Horak");
-            DeletePersonAddress(p => p.Id == 9, a => a.Id == 2);
+            //DeletePersonAddress(p => p.Id == 9, a => a.Id == 2);
         }
 
         private static void DeletePersonAddress(Func<Person, bool> singlePersonPredicate, Func<Address, bool> singleAddressPredicate)
@@ -56,16 +56,16 @@ namespace EFConsoleApplication
             {
                 var person = new Person
                 {
-                    FirstName = "Josef",
+                    FirstName = "Karel",
                     LastName = "Horak",
-                    BirthDate = DateTime.Now.AddYears(-35)
+                    BirthDate = DateTime.Now.AddYears(-22)
                 };
 
                 var address1 = new Address
                 {
-                    City = "Olomouc",
-                    Number = "10",
-                    PostalCode = "12345",
+                    City = "Ostrava",
+                    Number = "20",
+                    PostalCode = "45678",
                     Country = "Czech",
                     AddressType = AddressType.Home
                 };

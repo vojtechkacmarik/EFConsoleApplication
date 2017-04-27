@@ -2,6 +2,7 @@
 
 namespace EFConsoleApplication.Models
 {
+    [SoftDelete("IsDeleted")]
     public abstract class EntityWithHistoryBase : EntityBase, IChangeTracking, ISoftDelete
     {
         public DateTime Created { get; set; }

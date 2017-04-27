@@ -62,12 +62,22 @@
     <Compile Include="Components\DateTimeProvider.cs" />
     <Compile Include="Components\IDateTimeProvider.cs" />
     <Compile Include="CreatedAndModifiedDateInterceptor.cs" />
-    <Compile Include="Extensions.cs" />
+    <Compile Include="DbContextExtensions.cs" />
+    <Compile Include="DbModificationClauseExtensions.cs" />
+    <Compile Include="Migrations\201704271253368_Changes.cs" />
+    <Compile Include="Migrations\201704271253368_Changes.Designer.cs">
+      <DependentUpon>201704271253368_Changes.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201704271610222_Changes2.cs" />
+    <Compile Include="Migrations\201704271610222_Changes2.Designer.cs">
+      <DependentUpon>201704271610222_Changes2.cs</DependentUpon>
+    </Compile>
     <Compile Include="Models\IChangeTracking.cs" />
     <Compile Include="Models\IEntity.cs" />
     <Compile Include="Models\ISoftDelete.cs" />
     <Compile Include="PersonInitializer.cs" />
     <Compile Include="Constants.cs" />
+    <Compile Include="SoftDeleteAttribute.cs" />
     <Compile Include="SoftDeleteHelper.cs" />
     <Compile Include="SoftDeleteInterceptor.cs" />
     <Compile Include="Enums\AddressType.cs" />
@@ -97,6 +107,12 @@
   <ItemGroup>
     <EmbeddedResource Include="Migrations\201704181212079_Init.resx">
       <DependentUpon>201704181212079_Init.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201704271253368_Changes.resx">
+      <DependentUpon>201704271253368_Changes.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201704271610222_Changes2.resx">
+      <DependentUpon>201704271610222_Changes2.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>

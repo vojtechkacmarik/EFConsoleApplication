@@ -11,7 +11,7 @@ namespace EFConsoleApplication
         public void Install(IWindsorContainer container, IConfigurationStore store)
         {
             container.Register(Component.For<IDateTimeProvider>().ImplementedBy<DateTimeProvider>());
-            //container.Register(Component.For<IDbCommandTreeInterceptor>().ImplementedBy<SoftDeleteInterceptor>());
+            container.Register(Component.For<IDbCommandTreeInterceptor>().ImplementedBy<SoftDeleteInterceptor>());
             container.Register(Component.For<IDbCommandTreeInterceptor>().ImplementedBy<CreatedAndModifiedDateInterceptor>());
         }
     }

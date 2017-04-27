@@ -34,7 +34,8 @@ namespace EFConsoleApplication.Models
         [Required]
         public AddressType AddressType { get; set; }
 
-        public int? PersonId { get; set; }
+        [Required]
+        public int PersonId { get; set; }
 
         [ForeignKey(nameof(PersonId))]
         public Person Person { get; set; }

@@ -9,17 +9,16 @@ namespace EFConsoleApplication
     {
         public override DbExpression Visit(DbScanExpression expression)
         {
-            var table = (EntityType)expression.Target.ElementType;
-            if (table.Properties.All(p => p.Name != Constants.IS_DELETED_COLUMN_NAME))
-            {
+            var columnName = SoftDeleteAttribute.GetSoftDeleteColumnName(expression.Target.ElementType);
+            var entityType = (EntityType)expression.Target.ElementType;
+            if (columnName == null || entityType.Properties.All(p => p.Name != columnName))
                 return base.Visit(expression);
-            }
 
             var binding = expression.Bind();
             return binding.Filter(
                 binding.VariableType
                     .Variable(binding.VariableName)
-                    .Property(Constants.IS_DELETED_COLUMN_NAME)
+                    .Property(columnName)
                     .NotEqual(DbExpression.FromBoolean(true)));
         }
     }

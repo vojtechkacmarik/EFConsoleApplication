@@ -4,7 +4,7 @@ using System.Data.Entity.Core.Common.CommandTrees.ExpressionBuilder;
 
 namespace EFConsoleApplication
 {
-    public static class Extensions
+    public static class DbModificationClauseExtensions
     {
         public static bool HasPropertyExpression(
             this DbModificationClause modificationClause)

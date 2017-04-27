@@ -40,6 +40,14 @@ namespace EFConsoleApplication
 
         private DbCommandTree HandleInsertCommand(DbInsertCommandTree insertCommand)
         {
+            var target = insertCommand.Target;
+            var variableType = target.VariableType;
+            var entityType = (EntityType)variableType.EdmType;
+            var expression = (DbScanExpression)target.Expression;
+            var entitySet = (EntitySet)expression.Target;
+            if (entityType.Properties.All(p => p.Name != Constants.CREATED_COLUMN_NAME && p.Name != Constants.MODIFIED_COLUMN_NAME))
+                return insertCommand;
+
             var now = m_DateTimeProvider.GetUtcNow();
 
             var setClauses = insertCommand.SetClauses
@@ -57,6 +65,12 @@ namespace EFConsoleApplication
 
         private DbCommandTree HandleUpdateCommand(DbUpdateCommandTree updateCommand)
         {
+            var target = updateCommand.Target;
+            var variableType = target.VariableType;
+            var entityType = (EntityType)variableType.EdmType;
+            if (entityType.Properties.All(p => p.Name != Constants.CREATED_COLUMN_NAME && p.Name != Constants.MODIFIED_COLUMN_NAME))
+                return updateCommand;
+
             var now = m_DateTimeProvider.GetUtcNow();
 
             var setClauses = updateCommand.SetClauses
