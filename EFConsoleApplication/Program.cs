@@ -32,6 +32,7 @@ namespace EFConsoleApplication
         {
             //CreatePersonWithAddress();
 
+            var personsWithAddress = GetPersonWithAddress(p => p.LastName == "Horak");
             var personsWithoutAddress = GetPersonWithoutAddress(p => p.LastName == "Horak");
             //DeletePersonAddress(p => p.Id == 9, a => a.Id == 2);
         }
