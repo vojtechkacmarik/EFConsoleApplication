@@ -96,6 +96,15 @@ namespace EFConsoleApplication
                 "SoftDeleteColumnName",
                 (type, attributes) => attributes.Single().ColumnName);
             modelBuilder.Conventions.Add(convention);
+
+            //modelBuilder.Entity<Person>()
+            //    .Property(e => e.RowVersion)
+            //    .IsConcurrencyToken()
+            //    .HasDatabaseGeneratedOption(DatabaseGeneratedOption.Computed);
+            //modelBuilder.Entity<Address>()
+            //    .Property(e => e.RowVersion)
+            //    .IsConcurrencyToken()
+            //    .HasDatabaseGeneratedOption(DatabaseGeneratedOption.Computed);
         }
 
         private static void ConfigureIsDeleted(DbModelBuilder modelBuilder)

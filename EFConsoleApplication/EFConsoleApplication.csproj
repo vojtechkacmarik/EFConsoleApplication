@@ -76,6 +76,10 @@
     <Compile Include="Migrations\201704271610222_Changes2.Designer.cs">
       <DependentUpon>201704271610222_Changes2.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201705090944567_AddRowVersion.cs" />
+    <Compile Include="Migrations\201705090944567_AddRowVersion.Designer.cs">
+      <DependentUpon>201705090944567_AddRowVersion.cs</DependentUpon>
+    </Compile>
     <Compile Include="Models\IChangeTracking.cs" />
     <Compile Include="Models\IEntity.cs" />
     <Compile Include="Models\ISoftDelete.cs" />
@@ -117,6 +121,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201704271610222_Changes2.resx">
       <DependentUpon>201704271610222_Changes2.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201705090944567_AddRowVersion.resx">
+      <DependentUpon>201705090944567_AddRowVersion.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
