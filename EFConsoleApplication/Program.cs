@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.Linq;
 using EFConsoleApplication.Enums;
 using EFConsoleApplication.Models;
@@ -34,7 +35,23 @@ namespace EFConsoleApplication
 
             var personsWithAddress = GetPersonWithAddress(p => p.LastName == "Horak");
             var personsWithoutAddress = GetPersonWithoutAddress(p => p.LastName == "Horak");
+
+            //UpdatePerson(personsWithAddress.FirstOrDefault());
             //DeletePersonAddress(p => p.Id == 9, a => a.Id == 2);
+        }
+
+        private static void UpdatePerson(Person personsWithAddress)
+        {
+            if (personsWithAddress == null) return;
+
+            using (var dbContext = new PersonDbContext())
+            {
+                personsWithAddress.BirthDate = DateTime.Today.AddYears(-30);
+
+                dbContext.Persons.Attach(personsWithAddress);
+                dbContext.Entry(personsWithAddress).State = EntityState.Modified;
+                dbContext.SaveChanges();
+            }
         }
 
         private static void DeletePersonAddress(Func<Person, bool> singlePersonPredicate, Func<Address, bool> singleAddressPredicate)

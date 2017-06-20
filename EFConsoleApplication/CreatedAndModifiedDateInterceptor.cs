@@ -82,7 +82,8 @@ namespace EFConsoleApplication
                 updateCommand.DataSpace,
                 updateCommand.Target,
                 updateCommand.Predicate,
-                setClauses.AsReadOnly(), null);
+                setClauses.AsReadOnly(),
+                updateCommand.Returning);
         }
     }
 }
