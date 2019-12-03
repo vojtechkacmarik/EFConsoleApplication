@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using EFConsoleApplication.Enums;
 using EFConsoleApplication.Models;
 
@@ -15,7 +17,19 @@ namespace EFConsoleApplication
 
             try
             {
-                PerformDatabaseOperations();
+                // PerformDatabaseOperations();
+
+                //var persons = TestSynchronouslyAsync().Result;
+                //foreach (var person in persons)
+                //{
+                //    Console.WriteLine("Person: " + person.FirstName);
+                //}
+
+                var persons = TestParalelsAsync().Result;
+                foreach (var person in persons)
+                {
+                    Console.WriteLine("Person: " + person.FirstName);
+                }
             }
             catch (Exception exception)
             {
@@ -27,6 +41,57 @@ namespace EFConsoleApplication
             Console.ReadLine();
 
             PersonInitializer.Dispose();
+        }
+
+        private static async Task<List<Person>> TestSynchronouslyAsync()
+        {
+            List<Person> personsA;
+            List<Person> personsB;
+
+            Console.WriteLine("DbContext creating ... ThreadId = " + Thread.CurrentThread.ManagedThreadId);
+            using (var dbContext = new PersonDbContext())
+            {
+                Console.WriteLine("DbContext created.");
+                personsA = await dbContext.Persons.Where(p => p.LastName == "Horak").ToListAsync();
+                Console.WriteLine("Step 1 end. ThreadId=" + Thread.CurrentThread.ManagedThreadId);
+                personsB = await dbContext.Persons.Where(p => p.LastName == "Novak").ToListAsync();
+                Console.WriteLine("Step 1 end. ThreadId=" + Thread.CurrentThread.ManagedThreadId);
+            }
+            Console.WriteLine("DbContext finish.");
+
+            return personsA.Concat(personsB).ToList();
+        }
+
+        private static async Task<List<Person>> TestParalelsAsync()
+        {
+            List<Person> personsA = null;
+            List<Person> personsB = null;
+
+            Console.WriteLine("DbContext creating ... ThreadId=" + Thread.CurrentThread.ManagedThreadId);
+            using (var dbContext = new PersonDbContext())
+            {
+                Console.WriteLine("DbContext created.");
+
+                var task1 = Task.Run(async () =>
+                {
+                    Console.WriteLine("Step 1 run. ThreadId=" + Thread.CurrentThread.ManagedThreadId);
+                    personsA = await dbContext.Persons.Where(p => p.LastName == "Horak").ToListAsync();
+                    Console.WriteLine("Step 1 end. ThreadId=" + Thread.CurrentThread.ManagedThreadId);
+                });
+
+                var task2 = Task.Run(async () =>
+                {
+                    Console.WriteLine("Step 2 run. ThreadId=" + Thread.CurrentThread.ManagedThreadId);
+                    personsB = await dbContext.Persons.Where(p => p.LastName == "Novak").ToListAsync();
+                    Console.WriteLine("Step 2 end. ThreadId=" + Thread.CurrentThread.ManagedThreadId);
+                });
+                var tasks = new List<Task> { task1, task2 };
+
+                await Task.WhenAll(tasks);
+            }
+            Console.WriteLine("DbContext finish.");
+
+            return personsA.Concat(personsB).ToList();
         }
 
         private static void PerformDatabaseOperations()
